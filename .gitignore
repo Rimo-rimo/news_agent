@@ -1,0 +1,3 @@
+.env
+notebooks/
+app/streamlit/config.yaml
