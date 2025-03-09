@@ -23,10 +23,31 @@ import uuid
 from app.services.user_manager import UserManager
 
 st.set_page_config(page_title="News Converter",layout="wide", initial_sidebar_state="collapsed")
+st.logo(image="./data/logo.svg", 
+        size="small"
+        )
+
+text_font_size = 18
 
 hide_decoration_bar_style = '''
     <style>
         header {visibility: hidden;}
+        .css-1544g2n {
+            background-color: white !important;
+        }
+        .css-1cypcdb {
+            background-color: white !important;
+        }
+        [data-testid="stSidebarContent"] {
+            background-color: white !important;
+            border-right: 1px solid #e6e6e6 !important;
+        }
+        .st-emotion-cache-1cypcdb {
+            background-color: white !important;
+        }
+        .st-emotion-cache-1544g2n {
+            background-color: white !important;
+        }
     </style>
 '''
 st.markdown(hide_decoration_bar_style, unsafe_allow_html=True)
@@ -128,7 +149,7 @@ if st.session_state['authentication_status']:
             newsletters_by_date[date_str].append(newsletter)
         
         # Display home button at the top
-        home_button = st.button("🏠 Home", use_container_width=True, type="primary")
+        home_button = st.button("Home", use_container_width=True, type="primary")
         if home_button:
             st.session_state.page = "home"
             st.session_state.news_query = None
@@ -145,11 +166,30 @@ if st.session_state['authentication_status']:
                 
                 for newsletter in date_newsletters:
                     # Create a button for each newsletter
-                    if st.button(f"📄 {newsletter['title'][:14]}...", key=f"newsletter_{newsletter['id']}", use_container_width=True):
-                        # Store the selected newsletter ID in session state
-                        st.session_state.selected_newsletter_id = newsletter['id']
-                        st.session_state.page = "view_newsletter"
-                        st.rerun()
+                    with stylable_container(
+                        key="green_button",
+                        css_styles="""
+                            button {
+                                color: #191F28;
+                                border-radius: 14px;
+                                border: none;
+                                margin: 0 auto;
+                                background-color: #F3F4F6;
+                                padding: 14px;
+                                transition: background-color 0.3s, transform 0.2s;
+                            }
+                            button:hover {
+                                background-color: #FCD27A;
+                                transform: translateY(-3px);
+                                cursor: pointer;
+                            }
+                            """,
+                    ):
+                        if st.button(f"{newsletter['title']}", key=f"newsletter_{newsletter['id']}", use_container_width=True):
+                            # Store the selected newsletter ID in session state
+                            st.session_state.selected_newsletter_id = newsletter['id']
+                            st.session_state.page = "view_newsletter"
+                            st.rerun()
                 
                 # Add some space between date groups
                 st.text("")
@@ -174,11 +214,13 @@ if st.session_state['authentication_status']:
             with st.container(border=False):
                 home_empty_container = st.container(height= 100, border=False)
                 home_title_empty = st.empty()
+                home_subtitle_empty = st.empty()
                 home_query_empty = st.empty()
                 home_error_empty = st.empty()
 
-                home_title_empty.markdown("<h1 style='text-align: center;'>News Converter</h1>", unsafe_allow_html=True)
-                input_url = home_query_empty.chat_input("link를 입력해 주세요.")
+                home_title_empty.markdown("<h1 style='text-align: center;'>Owl Letter</h1>", unsafe_allow_html=True)
+                home_subtitle_empty.markdown("<h3 style='text-align: center;'>세상 모든 뉴스를 쉽게 이해해 보세요.</h3>", unsafe_allow_html=True)
+                input_url = home_query_empty.chat_input("뉴스 link를 입력해 주세요.")
 
                 # URL 형식 검증
                 if input_url:
@@ -195,6 +237,7 @@ if st.session_state['authentication_status']:
                         st.session_state.news_query = input_url
                         st.session_state.page = "content"
                         home_title_empty.empty()
+                        home_subtitle_empty.empty()
                         home_query_empty.empty()
                         home_error_empty.empty()
                         st.rerun()
@@ -209,7 +252,7 @@ if st.session_state['authentication_status']:
             key="content_container",
             css_styles="""
                     {
-                        width: 760px;
+                        width: 700px;
                         margin: 0 auto;
                         display: flex;
                         flex-direction: column;
@@ -221,7 +264,7 @@ if st.session_state['authentication_status']:
             key="newsletter_container",
             css_styles="""
                     {
-                        width: 760px;
+                        width: 700px;
                         margin: 0 auto;
                         display: flex;
                     }
@@ -231,7 +274,7 @@ if st.session_state['authentication_status']:
             key="qa_container",
             css_styles="""
                     {
-                        width: 760px;
+                        width: 700px;
                         margin: 0 auto;
                         display: flex;
                     }
@@ -271,7 +314,7 @@ if st.session_state['authentication_status']:
                     key="introduction_container",
                     css_styles="""
                             {
-                                width: 760px;
+                                width: 700px;
                                 margin: 0 auto;
                                 background-color: #F3F4F6;
                                 border-radius: 16px;
@@ -282,7 +325,7 @@ if st.session_state['authentication_status']:
             with introduction_container:
                 with st.container(border=False):
                     with st.container(border=False):
-                        st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: 16px;'>{introduction}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: {text_font_size}px;'>{introduction}</div>", unsafe_allow_html=True)
 
             st.text(" ")
             st.text(" ")
@@ -354,6 +397,11 @@ if st.session_state['authentication_status']:
                     ):
                         full_response += chunk
                         news_placeholder.markdown(full_response)
+                        news_placeholder.markdown(f"""
+                            <div style='color: #3E4550; line-height: 1.8; font-size: {text_font_size}px;' markdown="1">
+                            {full_response}
+                            </div>""", unsafe_allow_html=True)
+                        # st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: {text_font_size}px;'>{introduction}</div>", unsafe_allow_html=True)
             st.text(" ")
             st.text(" ")
             st.text(" ")
@@ -362,7 +410,7 @@ if st.session_state['authentication_status']:
         # Get the selected newsletter details
         data_manager = DataManager()
         newsletter = data_manager.get_newsletter_by_id(st.session_state.selected_newsletter_id)
-        
+            
         if not newsletter:
             st.error("뉴스레터를 찾을 수 없습니다.")
             st.session_state.page = "home"
@@ -372,7 +420,7 @@ if st.session_state['authentication_status']:
             key="content_container",
             css_styles="""
                     {
-                        width: 760px;
+                        width: 700px;
                         margin: 0 auto;
                         display: flex;
                         flex-direction: column;
@@ -396,7 +444,7 @@ if st.session_state['authentication_status']:
                 key="introduction_container",
                 css_styles="""
                         {
-                            width: 760px;
+                            width: 700px;
                             margin: 0 auto;
                             background-color: #F3F4F6;
                             border-radius: 16px;
@@ -406,14 +454,17 @@ if st.session_state['authentication_status']:
             )
             with introduction_container:
                 with st.container(border=False):
-                    st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: 16px;'>{newsletter['introduction']}</div>", unsafe_allow_html=True)
-            
+                    st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: {text_font_size}px;'>{newsletter['introduction']}</div>", unsafe_allow_html=True)
             st.text(" ")
             st.text(" ")
             
             # Display newsletter content
             with st.container(border=False):
-                st.markdown(newsletter['content'])
+                # st.markdown(newsletter['content'], unsafe_allow_html=True)
+                st.markdown(f"""
+                            <div style='color: #3E4550; line-height: 1.8; font-size: {text_font_size}px;' markdown="1">
+                            \n {newsletter['content']}
+                            </div>""", unsafe_allow_html=True)
             
             st.text(" ")
             st.text(" ")
@@ -422,7 +473,7 @@ if st.session_state['authentication_status']:
                 key="qa_container",
                 css_styles="""
                         {
-                            width: 760px;
+                            width: 700px;
                             margin: 0 auto;
                             display: flex;
                         }
