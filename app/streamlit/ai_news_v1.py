@@ -10,7 +10,6 @@ from app.services.newsletter_writer import NewsletterWriter
 from app.services.crawl_agent import CrawlAgent
 from app.services.data_manager import DataManager
 from streamlit_extras.stylable_container import stylable_container
-import streamlit.components.v1 as components
 import json
 import time
 import requests
@@ -27,21 +26,6 @@ st.set_page_config(page_title="Owl Letter",layout="wide", page_icon="🦉",initi
 st.logo(image="./data/logo.svg", 
         size="small"
         )
-
-# ############## dify chatbot ui ##############
-# # HTML 코드 정의
-# dify_chatbot_code = """
-# <iframe
-#  src="https://udify.app/chatbot/jH3bBdYf2zDVuUNs"
-#  style="width: 100%; height: 400px;
-#  frameborder="0"
-#  allow="microphone">
-# </iframe>
-# """
-
-# # Streamlit에 HTML 컴포넌트로 삽입
-# components.html(dify_chatbot_code, height=600, width=800)
-# ############## dify chatbot ui ##############
 
 text_font_size = 18
 
@@ -317,9 +301,7 @@ if st.session_state['authentication_status']:
                     question_ids = question_generator_response["question_ids"]
                     questions = question_generator_response["questions"]
                     title = question_generator_response["title"]
-                    introduction = question_generator_response["introduction"]
-                    urls = question_generator_response["urls"]
-                    answers = question_generator_response["answers"]
+                    introduction = question_generator_response["introduction"]    
 
         with content_container:
             st.markdown(f"<h3 style='text-align: center; color: #333D4B; width: 100%;'>{title}</h3>", unsafe_allow_html=True)
@@ -351,40 +333,75 @@ if st.session_state['authentication_status']:
         with qa_container:
             with st.container(border=False):
                 status_ment = st.empty()
-                question_empties = [st.empty() for _ in range(len(questions))]
+                question_empty_1 = st.empty()
+                question_empty_2 = st.empty()
+                question_empty_3 = st.empty()
+                question_empty_4 = st.empty()
+                question_empty_5 = st.empty()
 
+                with question_empty_1:
+                    with st.expander(f"Q. :grey[{questions[0]}]"):
+                        st.text("🧐 생성 중이에요")
+                with question_empty_2:
+                    with st.expander(f"Q. :grey[{questions[1]}]"):
+                        st.text("🧐 생성 중이에요")
+                with question_empty_3:
+                    with st.expander(f"Q. :grey[{questions[2]}]"):
+                        st.text("🧐 생성 중이에요")
+                with question_empty_4:
+                    with st.expander(f"Q. :grey[{questions[3]}]"):
+                        st.text("🧐 생성 중이에요")
+                with question_empty_5:
+                    with st.expander(f"Q. :grey[{questions[4]}]"):
+                        st.text("🧐 생성 중이에요")
+
+                # 답변 생성
+                with status_ment:
+                    with st.spinner("##### :red-background[아래 궁금증도 함께 조사해 볼게요!]"):
+                        search_agent = SearchAgent()
+                        answers = search_agent.search_answer(user_id=user_info["id"], questions=str(questions), question_ids=question_ids)
+
+                status_ment.empty()
                 status_ment.markdown("##### :red-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
-                for i, empty in enumerate(question_empties):
-                    with empty:
-                        with st.expander(f"Q. :grey[{questions[i]}]"):
-                            st.markdown(answers[i], unsafe_allow_html=True)
+                with question_empty_1:
+                    with st.expander(f"Q. :grey[{questions[0]}]"):
+                        st.markdown(answers[0]["answer"], unsafe_allow_html=True)
+                with question_empty_2:
+                    with st.expander(f"Q. :grey[{questions[1]}]"):
+                        st.markdown(answers[1]["answer"], unsafe_allow_html=True)
+                with question_empty_3:
+                    with st.expander(f"Q. :grey[{questions[2]}]"):
+                        st.markdown(answers[2]["answer"], unsafe_allow_html=True)
+                with question_empty_4:
+                    with st.expander(f"Q. :grey[{questions[3]}]"):
+                        st.markdown(answers[3]["answer"], unsafe_allow_html=True)
+                with question_empty_5:
+                    with st.expander(f"Q. :grey[{questions[4]}]"):
+                        st.markdown(answers[4]["answer"], unsafe_allow_html=True)
 
         with newsletter_container:
             with st.container(border=False):
-                # 뉴스레터 전체 내용을 담을 placeholder
                 news_placeholder = st.empty()
-                
                 with st.spinner("##### 뉴스레터를 작성 중이에요."):
                     # 뉴스 생성
                     full_response = "\n"
-                    
                     newsletter_writer = NewsletterWriter()
                     # Stream the response
                     for chunk in newsletter_writer.write_newsletter(
                         user_id=user_info["id"], 
                         news_id=news_id, 
-                        news_content=news_content,
+                        news_content=news_content,  # crawl_agent에서 가져온 content 사용
                         answers=str(answers), 
                         newsletter_title=title, 
                         newsletter_introduction=introduction
                     ):
                         full_response += chunk
-                        news_placeholder.markdown(
-                                    f"""<div style='color: #3E4550; line-height: 1.8; font-size: {text_font_size}px;'>
-                                    {full_response}</div>""", 
-                                    unsafe_allow_html=True
-                                )
-            
+                        news_placeholder.markdown(full_response)
+                        news_placeholder.markdown(f"""
+                            <div style='color: #3E4550; line-height: 1.8; font-size: {text_font_size}px;' markdown="1">
+                            {full_response}
+                            </div>""", unsafe_allow_html=True)
+                        # st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: {text_font_size}px;'>{introduction}</div>", unsafe_allow_html=True)
             st.text(" ")
             st.text(" ")
             st.text(" ")
