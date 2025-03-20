@@ -228,6 +228,7 @@ if st.session_state['authentication_status']:
         )
         with home_container:
             with st.container(border=False):
+                # st.markdown("![이미지 설명](https://cdn.4th.kr/news/photo/202008/20200811_1_bodyimg_1045409.JPG)")
                 home_empty_container = st.container(height= 100, border=False)
                 home_title_empty = st.empty()
                 home_subtitle_empty = st.empty()
@@ -371,6 +372,7 @@ if st.session_state['authentication_status']:
                         tavily_answers = search_agent_response["tavily_answers"]
                         perplexity_urls = search_agent_response["perplexity_urls"]
                         tavily_urls = search_agent_response["tavily_urls"]
+                        tavily_images = search_agent_response["tavily_images"]
                         
                 status_ment.markdown("##### :red-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
                 
@@ -378,6 +380,9 @@ if st.session_state['authentication_status']:
                     with perplexity_question_empty:
                         with st.expander(f"Q. :grey[{perplexity_questions[i]}]"):
                             st.markdown(perplexity_answers[i], unsafe_allow_html=True)
+                            
+                # for tavily_image in tavily_images:
+                #     st.image(tavily_image["url"])
                 
 
         with newsletter_container:
@@ -409,13 +414,14 @@ if st.session_state['authentication_status']:
                         )
                         
                     # Stream the response
-                    for chunk in newsletter_writer.write_newsletter(
+                    for chunk in newsletter_writer.run(
                         user_id=user_info["id"], 
                         news_id=news_id, 
                         news_content=news_content,
                         answers=str(answers), 
                         newsletter_title=title, 
-                        newsletter_introduction=introduction
+                        newsletter_introduction=introduction,
+                        tavily_images=str(tavily_images)
                     ):
                         full_response += chunk
                         news_placeholder.markdown(

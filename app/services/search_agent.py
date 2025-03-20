@@ -79,6 +79,10 @@ class SearchAgent:
             
             tavily_answers = [result["results"][0]['raw_content'] for result in tavily_result]
             tavily_urls = [result["results"][0]['url'] for result in tavily_result]
+            tavily_images = []
+            for result in tavily_result:
+                for image in result['images']:
+                    tavily_images.append(image)
             
             perplexity_answer_ids = self.store_perplexity_answers(perplexity_question_ids, perplexity_answers, perplexity_urls)
             tavily_answer_ids = self.store_tavily_answers(tavily_question_ids, tavily_answers, tavily_urls)
@@ -89,7 +93,8 @@ class SearchAgent:
                 "perplexity_answers": perplexity_answers,
                 "tavily_answers": tavily_answers,
                 "perplexity_urls": perplexity_urls,
-                "tavily_urls": tavily_urls
+                "tavily_urls": tavily_urls,
+                "tavily_images": tavily_images
             }
         
         else:

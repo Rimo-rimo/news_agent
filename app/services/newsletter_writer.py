@@ -36,13 +36,14 @@ class NewsletterWriter:
         return response.data[0]["id"]
         
         response = requests.post(self.url, headers=self.headers, json=payload)
-    def write_newsletter(self, user_id: int, news_id: int, news_content: str, answers: str, newsletter_title: str, newsletter_introduction: str):
+    def run(self, user_id: int, news_id: int, news_content: str, answers: str, newsletter_title: str, newsletter_introduction: str, tavily_images: str):
         payload = {
             'inputs': {
                 'news_content': news_content,
                 'query_answer': answers,
                 'newsletter_title': newsletter_title,
-                'newsletter_introduction': newsletter_introduction
+                'newsletter_introduction': newsletter_introduction,
+                'tavily_images': tavily_images
             },
             'response_mode': 'streaming',
             'user': str(user_id)
