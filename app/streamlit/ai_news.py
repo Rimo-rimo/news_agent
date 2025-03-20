@@ -4,7 +4,7 @@
 
 import streamlit as st
 import streamlit_authenticator as stauth
-from app.services.question_generator import QuestionGenerator
+from app.services.pre_news_agent import PreNewsAgent
 from app.services.search_agent import SearchAgent
 from app.services.newsletter_writer import NewsletterWriter
 from app.services.crawl_agent import CrawlAgent
@@ -302,24 +302,24 @@ if st.session_state['authentication_status']:
                 with st.spinner("##### 뉴스를 읽어보고 있어요"):
                     # 크롤링 에이전트로 URL에서 콘텐츠 추출 및 저장
                     crawl_agent = CrawlAgent()
-                    crawl_agent_response = crawl_agent.crawl_website(user_id=user_info["id"], url=st.session_state.news_query)
+                    crawl_agent_response = crawl_agent.run(user_id=user_info["id"], url=st.session_state.news_query)
                     news_id = crawl_agent_response["news_id"]
                     news_content = crawl_agent_response["content"]
 
                     # 질문 생성 (이미 저장된 news_id 사용)
-                    question_generator = QuestionGenerator()
-                    question_generator_response = question_generator.generate_questions(
+                    pre_news_agent = PreNewsAgent()
+                    question_generator_response = pre_news_agent.run(
                         user_id=user_info["id"], 
                         news_id=news_id,
                         news_content=news_content, 
                         question_n=5
                     )
-                    question_ids = question_generator_response["question_ids"]
-                    questions = question_generator_response["questions"]
                     title = question_generator_response["title"]
                     introduction = question_generator_response["introduction"]
-                    urls = question_generator_response["urls"]
-                    answers = question_generator_response["answers"]
+                    perplexity_question_ids = question_generator_response["perplexity_question_ids"]
+                    tavily_question_ids = question_generator_response["tavily_question_ids"]
+                    perplexity_questions = question_generator_response["perplexity_questions"]
+                    tavily_questions = question_generator_response["tavily_questions"]
 
         with content_container:
             st.markdown(f"<h3 style='text-align: center; color: #333D4B; width: 100%;'>{title}</h3>", unsafe_allow_html=True)
@@ -351,13 +351,34 @@ if st.session_state['authentication_status']:
         with qa_container:
             with st.container(border=False):
                 status_ment = st.empty()
-                question_empties = [st.empty() for _ in range(len(questions))]
-
+                perplexity_question_empties = [st.empty() for _ in range(len(perplexity_questions))]
+                for i, perplexity_question_empty in enumerate(perplexity_question_empties):
+                    with perplexity_question_empty:
+                        with st.expander(f"Q. :grey[{perplexity_questions[i]}]"):
+                            st.markdown("생성 중입니다.")
+                
+                with status_ment:
+                    with st.spinner("##### :red-background[아래 궁금증도 함께 조사해 볼게요!]"):
+                        search_agent = SearchAgent()
+                        search_agent_response = search_agent.run(
+                            user_id=user_info["id"],
+                            perplexity_questions=perplexity_questions,
+                            tavily_questions=tavily_questions,
+                            perplexity_question_ids=perplexity_question_ids,
+                            tavily_question_ids=tavily_question_ids
+                        )
+                        perplexity_answers = search_agent_response["perplexity_answers"]
+                        tavily_answers = search_agent_response["tavily_answers"]
+                        perplexity_urls = search_agent_response["perplexity_urls"]
+                        tavily_urls = search_agent_response["tavily_urls"]
+                        
                 status_ment.markdown("##### :red-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
-                for i, empty in enumerate(question_empties):
-                    with empty:
-                        with st.expander(f"Q. :grey[{questions[i]}]"):
-                            st.markdown(answers[i], unsafe_allow_html=True)
+                
+                for i, perplexity_question_empty in enumerate(perplexity_question_empties):
+                    with perplexity_question_empty:
+                        with st.expander(f"Q. :grey[{perplexity_questions[i]}]"):
+                            st.markdown(perplexity_answers[i], unsafe_allow_html=True)
+                
 
         with newsletter_container:
             with st.container(border=False):
@@ -369,6 +390,24 @@ if st.session_state['authentication_status']:
                     full_response = "\n"
                     
                     newsletter_writer = NewsletterWriter()
+                    
+                    answers = []
+                    for question, answer in zip(perplexity_questions, perplexity_answers):
+                        answers.append(
+                            {
+                                "question": question,
+                                "answer": answer
+                            }
+                        )
+                        
+                    for question, answer in zip(tavily_questions, tavily_answers):
+                        answers.append(
+                            {
+                                "question": question,
+                                "answer": answer
+                            }
+                        )
+                        
                     # Stream the response
                     for chunk in newsletter_writer.write_newsletter(
                         user_id=user_info["id"], 

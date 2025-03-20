@@ -17,29 +17,52 @@ class SearchAgent:
             os.getenv('SUPABASE_KEY')
         )
         
-    def store_answer(self, question_ids: list, answers: list):
+    def store_perplexity_answers(self, question_ids: list, answers: list, urls_list: list):
         """
-        Supabase의 answers 테이블에 각 질문에 대한 답변을 개별 레코드로 저장
+        Supabase의 perplexity_answers 테이블에 각 질문에 대한 답변을 개별 레코드로 저장
         """
         answer_records = [
             {
                 "question_id": question_id,
-                "answer": answer
-            } for question_id, answer in zip(question_ids, answers)
+                "answer": str(answer) if answer else "null",
+                "urls": str(urls)
+            } for question_id, answer, urls in zip(question_ids, answers, urls_list)
         ]
         
         response = (
-            self.supabase.table("answers")
+            self.supabase.table("perplexity_answers")
             .insert(answer_records)
             .execute()
         )
         
         return [record["id"] for record in response.data]
+    
+    def store_tavily_answers(self, question_ids: list, answers: list, urls_list: list):
+        """
+        Supabase의 tavily_answers 테이블에 각 질문에 대한 답변을 개별 레코드로 저장
+        """
+        answer_records = [
+            {
+                "question_id": question_id,
+                "answer": str(answer) if answer else "null",
+                "urls": str(urls)
+            } for question_id, answer, urls in zip(question_ids, answers, urls_list)
+        ]
+        
+        response = (
+            self.supabase.table("tavily_answers")
+            .insert(answer_records)
+            .execute()
+        )
+        
+        return [record["id"] for record in response.data]
+    
 
-    def search_answer(self, user_id: int, questions: str, question_ids: list):
+    def run(self, user_id: int, perplexity_questions: list, tavily_questions: list, perplexity_question_ids: list, tavily_question_ids: list):
         payload = {
             'inputs': {
-                'questions': questions
+                'perplexity_questions': str(perplexity_questions),
+                'tavily_questions': str(tavily_questions)
             },
             'user': str(user_id)
         }
@@ -47,9 +70,27 @@ class SearchAgent:
         response = requests.post(self.url, headers=self.headers, json=payload)
         
         if response.status_code == 200:
-            answers = response.json()['data']['outputs']["search_result"]
-            answer_ids = self.store_answer(question_ids, answers)
-            return answers
+            response_json = response.json()
+            perplexity_result = response_json['data']['outputs']["perplexity_result"]
+            tavily_result = response_json['data']['outputs']["tavily_result"]
+            
+            perplexity_answers = [result['content'] for result in perplexity_result]
+            perplexity_urls = [result['citations'] for result in perplexity_result]
+            
+            tavily_answers = [result["results"][0]['raw_content'] for result in tavily_result]
+            tavily_urls = [result["results"][0]['url'] for result in tavily_result]
+            
+            perplexity_answer_ids = self.store_perplexity_answers(perplexity_question_ids, perplexity_answers, perplexity_urls)
+            tavily_answer_ids = self.store_tavily_answers(tavily_question_ids, tavily_answers, tavily_urls)
+            # return perplexity_answers, tavily_answers
+            return {
+                "perplexity_answer_ids": perplexity_answer_ids,
+                "tavily_answer_ids": tavily_answer_ids,
+                "perplexity_answers": perplexity_answers,
+                "tavily_answers": tavily_answers,
+                "perplexity_urls": perplexity_urls,
+                "tavily_urls": tavily_urls
+            }
         
         else:
             raise Exception(f"API 호출 실패: {response.status_code}")

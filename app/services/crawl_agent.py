@@ -37,7 +37,7 @@ class CrawlAgent:
         
         return response.data[0]["id"]
     
-    def crawl_website(self, user_id: int, url: str):
+    def run(self, user_id: int, url: str):
         """
         지정된 URL에서 콘텐츠를 크롤링하고 결과를 저장
         """

@@ -4,7 +4,7 @@
 
 import streamlit as st
 import streamlit_authenticator as stauth
-from app.services.question_generator import QuestionGenerator
+from app.services.pre_news_agent import PreNewsAgent
 from app.services.search_agent import SearchAgent
 from app.services.newsletter_writer import NewsletterWriter
 from app.services.crawl_agent import CrawlAgent
@@ -291,8 +291,8 @@ if st.session_state['authentication_status']:
                     news_content = crawl_agent_response["content"]
 
                     # 질문 생성 (이미 저장된 news_id 사용)
-                    question_generator = QuestionGenerator()
-                    question_generator_response = question_generator.generate_questions(
+                    pre_news_agent = PreNewsAgent()
+                    question_generator_response = pre_news_agent.generate_questions(
                         user_id=user_info["id"], 
                         news_id=news_id,
                         news_content=news_content, 
