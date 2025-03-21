@@ -1,6 +1,9 @@
 import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
 import re
+import base64
+
+
 
 def render_home():
     home_container = stylable_container(
@@ -12,6 +15,14 @@ def render_home():
                 }
                 """,
     )
+    
+    # with open("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/icon.svg", "r") as file:
+    #     svg_icon = file.read()
+    # b64 = base64.b64encode(svg_icon.encode('utf-8')).decode('utf-8')
+    # svg_img_tag = f'<img src="data:image/svg+xml;base64,{b64}" width="50" height="50">'
+    
+    # st.markdown(f"# {svg_img_tag} 안녕하세요", unsafe_allow_html=True)
+    
     with home_container:
         with st.container(border=False):
             home_empty_container = st.container(height=100, border=False)

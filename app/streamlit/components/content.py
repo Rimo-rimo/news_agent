@@ -5,6 +5,7 @@ from app.services.pre_news_agent import PreNewsAgent
 from app.services.search_agent import SearchAgent
 from app.services.newsletter_writer import NewsletterWriter
 import datetime
+from app.streamlit.components.icon import icon_dict
 import time
 
 def render_content(user_info, text_font_size):
@@ -152,6 +153,7 @@ def render_content(user_info, text_font_size):
                 for question, answer in zip(tavily_questions, tavily_answers):
                     answers.append({"question": question, "answer": answer})
                     
+                icon_index = 1  # 아이콘 인덱스 초기화
                 for chunk in newsletter_writer.run(
                     user_id=user_info["id"],
                     news_id=news_id,
@@ -160,6 +162,13 @@ def render_content(user_info, text_font_size):
                     newsletter_title=title,
                     newsletter_introduction=introduction
                 ):
+                    # ### 패턴을 찾아서 아이콘 추가
+                    if '###' in chunk:
+                        # icon_dict에서 사용할 수 있는 아이콘 개수를 초과하지 않도록 함
+                        icon_key = f"icon_{min(icon_index, 18)}"
+                        chunk = chunk.replace('###', f'### {icon_dict[icon_key]}')
+                        icon_index += 1
+                    
                     full_response += chunk
                     news_placeholder.markdown(
                         f"""<div style='color: #3E4550; line-height: 1.8; font-size: {text_font_size}px;'>
