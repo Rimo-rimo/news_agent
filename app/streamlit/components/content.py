@@ -140,6 +140,7 @@ def render_content(user_info, text_font_size):
             st.text(" ")
             st.text(" ")
             
+            
             news_placeholder = st.empty()
             
             with st.spinner("##### 뉴스레터를 작성 중이에요."):
