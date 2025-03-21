@@ -67,7 +67,11 @@ class SearchAgent:
             'user': str(user_id)
         }
         
-        response = requests.post(self.url, headers=self.headers, json=payload)
+        try:
+            response = requests.post(self.url, headers=self.headers, json=payload, timeout=230)
+        except requests.exceptions.Timeout:
+            # 타임아웃 발생 시 처리할 로직
+            raise Exception(f"요청 시간이 초과되었습니다. 다시 시도해주세요.")
         
         if response.status_code == 200:
             response_json = response.json()
@@ -75,10 +79,16 @@ class SearchAgent:
             tavily_result = response_json['data']['outputs']["tavily_result"]
             
             perplexity_answers = [result['content'] for result in perplexity_result]
-            perplexity_urls = [result['citations'] for result in perplexity_result]
+            perplexity_urls = []
+            for result in perplexity_result:
+                for url in result['citations']:
+                    perplexity_urls.append(url)
             
             tavily_answers = [result["results"][0]['raw_content'] for result in tavily_result]
-            tavily_urls = [result["results"][0]['url'] for result in tavily_result]
+            tavily_urls = []
+            for result in tavily_result:
+                tavily_urls.append(result["results"][0]['url'])
+                    
             tavily_images = []
             for result in tavily_result:
                 for image in result['images']:
@@ -94,7 +104,8 @@ class SearchAgent:
                 "tavily_answers": tavily_answers,
                 "perplexity_urls": perplexity_urls,
                 "tavily_urls": tavily_urls,
-                "tavily_images": tavily_images
+                "tavily_images": tavily_images,
+                "urls": perplexity_urls + tavily_urls
             }
         
         else:

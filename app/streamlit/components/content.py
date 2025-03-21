@@ -5,6 +5,7 @@ from app.services.pre_news_agent import PreNewsAgent
 from app.services.search_agent import SearchAgent
 from app.services.newsletter_writer import NewsletterWriter
 import datetime
+import time
 
 def render_content(user_info, text_font_size):
     content_container = stylable_container(
@@ -101,7 +102,7 @@ def render_content(user_info, text_font_size):
                         st.markdown("생성 중입니다.")
             
             with status_ment:
-                with st.spinner("##### :red-background[아래 궁금증도 함께 조사해 볼게요!]"):
+                with st.spinner("##### :grey-background[아래 궁금증도 함께 조사해 볼게요!]"):
                     search_agent = SearchAgent()
                     search_agent_response = search_agent.run(
                         user_id=user_info["id"],
@@ -113,8 +114,12 @@ def render_content(user_info, text_font_size):
                     perplexity_answers = search_agent_response["perplexity_answers"]
                     tavily_answers = search_agent_response["tavily_answers"]
                     tavily_images = search_agent_response["tavily_images"]
+                    urls = search_agent_response["urls"]
                     
-            status_ment.markdown("##### :red-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
+            status_ment.markdown("##### :grey-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
+            with st.popover(f"총 {len(urls)}개의 기사를 분석했어요."):
+                for url in urls:
+                    st.markdown(f"[{url}]({url})", unsafe_allow_html=True)
             
             for i, perplexity_question_empty in enumerate(perplexity_question_empties):
                 with perplexity_question_empty:
@@ -131,6 +136,7 @@ def render_content(user_info, text_font_size):
                     <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"></div>"""
             
             st.markdown(f"""<div style="display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0;">{image_cards}</div>""", unsafe_allow_html=True)
+            st.text(" ")
             st.text(" ")
             
             news_placeholder = st.empty()
