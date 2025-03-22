@@ -108,7 +108,7 @@ def render_content(user_info, text_font_size):
                         st.markdown("생성 중입니다.")
             
             with status_ment:
-                with st.spinner("##### :grey-background[아래 궁금증도 함께 조사해 볼게요!]"):
+                with st.spinner("##### 아래 궁금증도 함께 조사해 볼게요!"):
                     search_agent = SearchAgent()
                     search_agent_response = search_agent.run(
                         user_id=user_info["id"],
@@ -134,25 +134,26 @@ def render_content(user_info, text_font_size):
     with newsletter_container:
         with st.container(border=False):
             # 가로 스크롤 가능한 영역
-            favicon_urls = []
-            url_titles = []
-            url_titles, favicon_urls = get_page_titles_parallel(urls)
-            # 파비콘과 URL을 함께 표시
-            url_popover_test = f"""![favicon]({favicon_urls[0]}) ![favicon]({favicon_urls[1]}) ![favicon]({favicon_urls[2]}) ![favicon]({favicon_urls[3]}) ![favicon]({favicon_urls[4]}) 총 **{len(urls)}**개의 기사를 분석했어요."""
-            with st.popover(url_popover_test, use_container_width=True):
-                for url, favicon_url, title in zip(urls, favicon_urls, url_titles):
-                    st.markdown(    
-                        f'<div style="display: flex; align-items: center; margin-bottom: 5px;">'
-                        f'<img src="{favicon_url}" style="margin-right: 5px; width: 20px; height: 20px;">'
-                        f'<a href="{url}" style="text-decoration: none; color: #000000;">{title}</a>'
-                        f'</div>',
-                        unsafe_allow_html=True
-                        )
-            # 이미지 표시
-            image_cards = ""
-            for tavily_image in tavily_images:
-                image_cards += f"""
-                    <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #000000;"></div>"""
+            with st.spinner("##### 관련 뉴스를 수집하고 있습니다."):
+                favicon_urls = []
+                url_titles = []
+                url_titles, favicon_urls = get_page_titles_parallel(urls)
+                # 파비콘과 URL을 함께 표시
+                url_popover_test = f"""![favicon]({favicon_urls[0]}) ![favicon]({favicon_urls[1]}) ![favicon]({favicon_urls[2]}) ![favicon]({favicon_urls[3]}) ![favicon]({favicon_urls[4]}) 총 **{len(urls)}**개의 기사를 분석했어요."""
+                with st.popover(url_popover_test, use_container_width=True):
+                    for url, favicon_url, title in zip(urls, favicon_urls, url_titles):
+                        st.markdown(
+                            f'<div style="display: flex; align-items: center; margin-bottom: 5px;">'
+                            f'<img src="{favicon_url}" style="margin-right: 5px; width: 20px; height: 20px;">'
+                            f'<a href="{url}" style="text-decoration: none; color: #000000;">{title}</a>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                            )
+                # 이미지 표시
+                image_cards = ""
+                for tavily_image in tavily_images:
+                    image_cards += f"""
+                        <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #000000;"></div>"""
             
             st.markdown(f"""<div style="display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0;">{image_cards}</div>""", unsafe_allow_html=True)
             st.text(" ")
@@ -218,7 +219,7 @@ def get_page_title(url):
         # 오류 발생 시 도메인 이름 반환
         return urllib.parse.urlparse(url).netloc 
 
-def get_page_titles_parallel(urls, max_workers=40):
+def get_page_titles_parallel(urls, max_workers=30):
     """여러 URL의 페이지 제목을 병렬로 가져옵니다."""
     titles = [None] * len(urls)
     favicon_urls = [None] * len(urls)

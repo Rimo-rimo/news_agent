@@ -25,14 +25,7 @@ def render_home():
         #     b64 = base64.b64encode(svg_content).decode()
         #     html = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 150px;">'
         #     st.markdown(html, unsafe_allow_html=True)
-        # a = """![favicon](https://www.google.com/s2/favicons?domain=https://v.daum.net&sz=64)
-        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.ytn.co.kr&sz=64)
-        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.koreadaily.com&sz=64)
-        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.newsis.com&sz=64)
-        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.koreadaily.com&sz=64)
-        #  총 **12**개의 기사를 분석했어요."""
-        # with st.popover(a, use_container_width=True):
-        #     st.text("허거덩 손정균 대박")
+        st.markdown(":blue-background[**your text here**]sdf")
 
 
         with st.container(border=False):
