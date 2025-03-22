@@ -61,9 +61,9 @@ def render_content(user_info, text_font_size):
                     user_id=user_info["id"],
                     news_id=news_id,
                     news_content=news_content,
-                    question_n=2
+                    question_n=5
                 )
-                title = pre_news_response["title"]
+                newsletter_title = pre_news_response["title"]
                 introduction = pre_news_response["introduction"]
                 perplexity_question_ids = pre_news_response["perplexity_question_ids"]
                 tavily_question_ids = pre_news_response["tavily_question_ids"]
@@ -72,7 +72,7 @@ def render_content(user_info, text_font_size):
 
     # Display title and introduction
     with content_container:
-        st.markdown(f"<h3 style='text-align: center; color: #333D4B; width: 100%;'>{title}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='text-align: center; color: #333D4B; width: 100%;'>{newsletter_title}</h3>", unsafe_allow_html=True)
         st.text(" ")
         current_date = datetime.datetime.now().strftime("%Y.%m.%d")
         st.markdown(f"<p style='text-align: center; color: #6B7684; width: 100%;'>{current_date} by {user_info['name']}</p>", unsafe_allow_html=True)
@@ -179,7 +179,7 @@ def render_content(user_info, text_font_size):
                     news_id=news_id,
                     news_content=news_content,
                     answers=str(answers),
-                    newsletter_title=title,
+                    newsletter_title=newsletter_title,
                     newsletter_introduction=introduction
                 ):
                     # ### 패턴을 찾아서 아이콘 추가

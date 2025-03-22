@@ -20,22 +20,20 @@ def render_home():
 
     with home_container:
         # SVG 파일 읽기 및 표시
-        # with open("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/illustrations/man_1.svg", "rb") as f:
-        #     svg_content = f.read()
-        #     b64 = base64.b64encode(svg_content).decode()
-        #     html = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 150px;">'
-        #     st.markdown(html, unsafe_allow_html=True)
-        # st.markdown(":blue-background[**your text here**]sdf")
+        with open("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/illustrations/man_1.svg", "rb") as f:
+            svg_content = f.read()
+            b64 = base64.b64encode(svg_content).decode()
+            home_illustration = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 300px;">'
 
 
         with st.container(border=False):
-            home_empty_container = st.container(height=100, border=False)
+            # home_empty_container = st.container(height=0, border=False)
             home_title_empty = st.empty()
             home_subtitle_empty = st.empty()
             home_query_empty = st.empty()
             home_error_empty = st.empty()
 
-            home_title_empty.markdown("<h1 style='text-align: center;'>Owl Letter</h1>", unsafe_allow_html=True)
+            home_title_empty.markdown(home_illustration, unsafe_allow_html=True)
             home_subtitle_empty.markdown("<h3 style='text-align: center;'>세상 모든 뉴스를 쉽게 이해해 보세요.</h3>", unsafe_allow_html=True)
             input_url = home_query_empty.chat_input("뉴스 link를 입력해 주세요.")
 
