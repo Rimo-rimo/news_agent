@@ -2,7 +2,9 @@ import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
 import re
 import base64
-
+import urllib.parse
+import requests
+from bs4 import BeautifulSoup
 
 
 def render_home():
@@ -18,12 +20,21 @@ def render_home():
 
     with home_container:
         # SVG 파일 읽기 및 표시
-        with open("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/illustrations/man_1.svg", "rb") as f:
-            svg_content = f.read()
-            b64 = base64.b64encode(svg_content).decode()
-            html = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 300px;">'
-            st.markdown(html, unsafe_allow_html=True)
-            
+        # with open("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/illustrations/man_1.svg", "rb") as f:
+        #     svg_content = f.read()
+        #     b64 = base64.b64encode(svg_content).decode()
+        #     html = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 150px;">'
+        #     st.markdown(html, unsafe_allow_html=True)
+        # a = """![favicon](https://www.google.com/s2/favicons?domain=https://v.daum.net&sz=64)
+        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.ytn.co.kr&sz=64)
+        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.koreadaily.com&sz=64)
+        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.newsis.com&sz=64)
+        #     ![favicon](https://www.google.com/s2/favicons?domain=https://www.koreadaily.com&sz=64)
+        #  총 **12**개의 기사를 분석했어요."""
+        # with st.popover(a, use_container_width=True):
+        #     st.text("허거덩 손정균 대박")
+
+
         with st.container(border=False):
             home_empty_container = st.container(height=100, border=False)
             home_title_empty = st.empty()
@@ -57,4 +68,4 @@ def render_home():
                 else:
                     # 잘못된 URL 형식인 경우
                     home_error_empty.error("올바른 URL 형식이 아닙니다. 다시 입력해주세요. (예: https://example.com)")
-                    st.session_state.news_query = None 
+                    st.session_state.news_query = None

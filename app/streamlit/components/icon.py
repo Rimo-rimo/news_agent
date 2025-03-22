@@ -34,4 +34,5 @@ icon_dict = {
     "icon_16": get_icon("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/icon/icon_16.svg", width, height),
     "icon_17": get_icon("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/icon/icon_17.svg", width, height),
     "icon_18": get_icon("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/icon/icon_18.svg", width, height),
+    "q": get_icon("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/icon/q.svg", width, height),
 }

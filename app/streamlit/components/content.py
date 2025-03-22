@@ -7,6 +7,10 @@ from app.services.newsletter_writer import NewsletterWriter
 import datetime
 from app.streamlit.components.icon import icon_dict
 import time
+import urllib.parse
+import requests
+from bs4 import BeautifulSoup
+import concurrent.futures
 
 def render_content(user_info, text_font_size):
     content_container = stylable_container(
@@ -45,6 +49,7 @@ def render_content(user_info, text_font_size):
     # Initial content generation
     with content_container:
         with st.container(border=False):
+            some_empty = st.empty()
             with st.spinner("##### 뉴스를 읽어보고 있어요"):
                 crawl_agent = CrawlAgent()
                 crawl_agent_response = crawl_agent.run(user_id=user_info["id"], url=st.session_state.news_query)
@@ -56,7 +61,7 @@ def render_content(user_info, text_font_size):
                     user_id=user_info["id"],
                     news_id=news_id,
                     news_content=news_content,
-                    question_n=5
+                    question_n=2
                 )
                 title = pre_news_response["title"]
                 introduction = pre_news_response["introduction"]
@@ -117,11 +122,9 @@ def render_content(user_info, text_font_size):
                     tavily_images = search_agent_response["tavily_images"]
                     urls = search_agent_response["urls"]
                     
-            status_ment.markdown("##### :grey-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
-            with st.popover(f"총 {len(urls)}개의 기사를 분석했어요."):
-                for url in urls:
-                    st.markdown(f"[{url}]({url})", unsafe_allow_html=True)
-            
+            # status_ment.markdown("##### :grey-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
+            status_ment.markdown(f"### {icon_dict['q']} 아래 궁금증을 해결해 봤어요!", unsafe_allow_html=True)
+            # f'### {icon_dict[icon_key]}'
             for i, perplexity_question_empty in enumerate(perplexity_question_empties):
                 with perplexity_question_empty:
                     with st.expander(f"Q. :grey[{perplexity_questions[i]}]"):
@@ -131,15 +134,29 @@ def render_content(user_info, text_font_size):
     with newsletter_container:
         with st.container(border=False):
             # 가로 스크롤 가능한 영역
+            favicon_urls = []
+            url_titles = []
+            url_titles, favicon_urls = get_page_titles_parallel(urls)
+            # 파비콘과 URL을 함께 표시
+            url_popover_test = f"""![favicon]({favicon_urls[0]}) ![favicon]({favicon_urls[1]}) ![favicon]({favicon_urls[2]}) ![favicon]({favicon_urls[3]}) ![favicon]({favicon_urls[4]}) 총 **{len(urls)}**개의 기사를 분석했어요."""
+            with st.popover(url_popover_test, use_container_width=True):
+                for url, favicon_url, title in zip(urls, favicon_urls, url_titles):
+                    st.markdown(    
+                        f'<div style="display: flex; align-items: center; margin-bottom: 5px;">'
+                        f'<img src="{favicon_url}" style="margin-right: 5px; width: 20px; height: 20px;">'
+                        f'<a href="{url}" style="text-decoration: none; color: #000000;">{title}</a>'
+                        f'</div>',
+                        unsafe_allow_html=True
+                        )
+            # 이미지 표시
             image_cards = ""
             for tavily_image in tavily_images:
                 image_cards += f"""
-                    <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"></div>"""
+                    <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #000000;"></div>"""
             
             st.markdown(f"""<div style="display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0;">{image_cards}</div>""", unsafe_allow_html=True)
             st.text(" ")
             st.text(" ")
-            
             
             news_placeholder = st.empty()
             
@@ -180,3 +197,48 @@ def render_content(user_info, text_font_size):
         st.text(" ")
         st.text(" ")
         st.text(" ") 
+
+def get_page_title(url):
+    try:
+        # 타임아웃을 짧게 설정하여 응답 지연 방지
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        response = requests.get(url, headers=headers, timeout=3)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            # 페이지 제목 가져오기
+            title = soup.title.string if soup.title else None
+            
+            # 제목이 너무 길면 자르기
+            if title and len(title) > 50:
+                title = title[:36] + "..."
+                
+            return title if title else urllib.parse.urlparse(url).netloc
+        return urllib.parse.urlparse(url).netloc
+    except Exception as e:
+        # 오류 발생 시 도메인 이름 반환
+        return urllib.parse.urlparse(url).netloc 
+
+def get_page_titles_parallel(urls, max_workers=40):
+    """여러 URL의 페이지 제목을 병렬로 가져옵니다."""
+    titles = [None] * len(urls)
+    favicon_urls = [None] * len(urls)
+    
+    def process_url(index_url):
+        index, url = index_url
+        parsed_url = urllib.parse.urlparse(url)
+        domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        favicon_url = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
+        title = get_page_title(url)
+        return index, title, favicon_url
+    
+    # 병렬로 URL 처리
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # URL과 인덱스를 함께 전달
+        results = executor.map(process_url, enumerate(urls))
+        
+        # 결과 저장
+        for index, title, favicon_url in results:
+            titles[index] = title
+            favicon_urls[index] = favicon_url
+            
+    return titles, favicon_urls 
