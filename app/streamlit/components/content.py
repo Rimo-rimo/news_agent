@@ -115,7 +115,8 @@ def render_content(user_info, text_font_size):
                         perplexity_questions=perplexity_questions,
                         tavily_questions=tavily_questions,
                         perplexity_question_ids=perplexity_question_ids,
-                        tavily_question_ids=tavily_question_ids
+                        tavily_question_ids=tavily_question_ids,
+                        news_id=news_id
                     )
                     perplexity_answers = search_agent_response["perplexity_answers"]
                     tavily_answers = search_agent_response["tavily_answers"]

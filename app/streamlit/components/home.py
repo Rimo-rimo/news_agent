@@ -25,7 +25,7 @@ def render_home():
         #     b64 = base64.b64encode(svg_content).decode()
         #     html = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 150px;">'
         #     st.markdown(html, unsafe_allow_html=True)
-        st.markdown(":blue-background[**your text here**]sdf")
+        # st.markdown(":blue-background[**your text here**]sdf")
 
 
         with st.container(border=False):

@@ -49,67 +49,114 @@ class DataManager:
     
     def get_newsletter_by_id(self, newsletter_id: int):
         """
-        Get a specific newsletter by its ID
+        Get a newsletter and all related data by its ID
         
         Args:
             newsletter_id: The ID of the newsletter
             
         Returns:
-            Newsletter details including related questions and answers
+            Dictionary containing the newsletter and all related data including
+            title, introduction, content, questions, answers, and citations
         """
-        # Get the newsletter
+        # First get the newsletter data
         newsletter_response = (
             self.supabase
             .from_("newsletters")
-            .select("*, news!inner(id, url, content, user_id)")
+            .select("*, news_id")
             .eq("id", newsletter_id)
-            .single()
             .execute()
         )
         
         if not newsletter_response.data:
             return None
         
-        newsletter = newsletter_response.data
+        newsletter = newsletter_response.data[0]
+        news_id = newsletter["news_id"]
         
-        # Get questions related to this news
-        questions_response = (
+        # Get original news content
+        news_response = (
             self.supabase
-            .from_("questions")
-            .select("id, question")
-            .eq("news_id", newsletter["news_id"])
+            .from_("news")
+            .select("*")
+            .eq("id", news_id)
             .execute()
         )
         
-        questions = questions_response.data if questions_response.data else []
+        if news_response.data:
+            newsletter["news"] = news_response.data[0]
         
-        # Get answers for each question
-        for question in questions:
-            answer_response = (
+        # Get perplexity questions
+        perplexity_questions_response = (
+            self.supabase
+            .from_("perplexity_questions")
+            .select("*")
+            .eq("news_id", news_id)
+            .execute()
+        )
+        
+        if perplexity_questions_response.data:
+            newsletter["perplexity_questions"] = perplexity_questions_response.data
+            
+            # Get corresponding perplexity answers
+            question_ids = [q["id"] for q in perplexity_questions_response.data]
+            perplexity_answers_response = (
                 self.supabase
-                .from_("answers")
-                .select("answer")
-                .eq("question_id", question["id"])
-                .single()
+                .from_("perplexity_answers")
+                .select("*")
+                .in_("question_id", question_ids)
                 .execute()
             )
             
-            if answer_response.data:
-                question["answer"] = answer_response.data["answer"]
-            else:
-                question["answer"] = ""
+            if perplexity_answers_response.data:
+                newsletter["perplexity_answers"] = perplexity_answers_response.data
         
-        # Combine all data
-        result = {
-            "id": newsletter["id"],
-            "title": newsletter["title"],
-            "introduction": newsletter["introduction"],
-            "content": newsletter["content"],
-            "created_at": newsletter["created_at"],
-            "news_id": newsletter["news_id"],
-            "news_url": newsletter["news"]["url"],
-            "news_content": newsletter["news"]["content"],
-            "questions": questions
-        }
+        # Get tavily questions
+        tavily_questions_response = (
+            self.supabase
+            .from_("tavily_questions")
+            .select("*")
+            .eq("news_id", news_id)
+            .execute()
+        )
         
-        return result
+        if tavily_questions_response.data:
+            newsletter["tavily_questions"] = tavily_questions_response.data
+            
+            # Get corresponding tavily answers
+            question_ids = [q["id"] for q in tavily_questions_response.data]
+            tavily_answers_response = (
+                self.supabase
+                .from_("tavily_answers")
+                .select("*")
+                .in_("question_id", question_ids)
+                .execute()
+            )
+            
+            if tavily_answers_response.data:
+                newsletter["tavily_answers"] = tavily_answers_response.data
+        
+        # Get citations
+        citations_response = (
+            self.supabase
+            .from_("citations")
+            .select("*")
+            .eq("news_id", news_id)
+            .execute()
+        )
+        
+        if citations_response.data:
+            newsletter["citations"] = citations_response.data
+            
+        # Get image URLs
+        image_urls_response = (
+            self.supabase
+            .from_("image_urls")
+            .select("*")
+            .eq("news_id", news_id)
+            .execute()
+        )
+        
+        if image_urls_response.data:
+            newsletter["image_urls"] = image_urls_response.data
+            
+        return newsletter

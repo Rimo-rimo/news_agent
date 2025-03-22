@@ -18,6 +18,7 @@ from app.streamlit.auth import setup_auth
 from app.streamlit.components.sidebar import render_sidebar
 from app.streamlit.components.home import render_home
 from app.streamlit.components.content import render_content
+from app.streamlit.components.view_content import render_view_content
 
 # Streamlit Settings
 st.set_page_config(page_title="Owl Letter",layout="wide", page_icon="🦉",initial_sidebar_state="collapsed")
@@ -78,88 +79,5 @@ if st.session_state['authentication_status']:
         render_content(user_info, text_font_size)
 
     # ############################# View Newsletter #############################
-    if st.session_state.page == "view_newsletter":
-        # Get the selected newsletter details
-        data_manager = DataManager()
-        newsletter = data_manager.get_newsletter_by_id(st.session_state.selected_newsletter_id)
-            
-        if not newsletter:
-            st.error("뉴스레터를 찾을 수 없습니다.")
-            st.session_state.page = "home"
-            st.rerun()
-        
-        content_container = stylable_container(
-            key="content_container",
-            css_styles="""
-                    {
-                        width: 700px;
-                        margin: 0 auto;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                    }
-                    """,
-        )
-        
-        with content_container:
-            # Display newsletter title and date
-            st.markdown(f"<h3 style='text-align: center; color: #333D4B; width: 100%;'>{newsletter['title']}</h3>", unsafe_allow_html=True)
-            st.text(" ")
-            
-            # Format the date from the created_at timestamp
-            created_date = datetime.datetime.fromisoformat(newsletter["created_at"].replace("Z", "+00:00")).strftime("%Y.%m.%d")
-            st.markdown(f"<p style='text-align: center; color: #6B7684; width: 100%;'>{created_date} by {user_info['name']}</p>", unsafe_allow_html=True)
-            st.text(" ")
-            
-            # Display introduction
-            introduction_container = stylable_container(
-                key="introduction_container",
-                css_styles="""
-                        {
-                            width: 700px;
-                            margin: 0 auto;
-                            background-color: #F3F4F6;
-                            border-radius: 16px;
-                            padding: 30px;
-                        }
-                        """,
-            )
-            with introduction_container:
-                with st.container(border=False):
-                    st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: {text_font_size}px;'>{newsletter['introduction']}</div>", unsafe_allow_html=True)
-            st.text(" ")
-            st.text(" ")
-            
-            # Display newsletter content
-            with st.container(border=False):
-                # st.markdown(newsletter['content'], unsafe_allow_html=True)
-                st.markdown(f"""
-                            <div style='color: #3E4550; line-height: 1.8; font-size: {text_font_size}px;' markdown="1">
-                            \n {newsletter['content']}
-                            </div>""", unsafe_allow_html=True)
-            
-            st.text(" ")
-            st.text(" ")
-                        # Display Q&A section
-            qa_container = stylable_container(
-                key="qa_container",
-                css_styles="""
-                        {
-                            width: 700px;
-                            margin: 0 auto;
-                            display: flex;
-                        }
-                        """,
-            )
-            
-            with qa_container:
-                with st.container(border=False):
-                    st.markdown("##### :red-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
-                    
-                    # Display each question and answer
-                    for question in newsletter['questions']:
-                        with st.expander(f"Q. :grey[{question['question']}]"):
-                            st.markdown(question['answer'], unsafe_allow_html=True)
-            
-            st.text(" ")
-            st.text(" ")
+    if st.session_state.page == "view_content":
+        render_view_content(user_info, text_font_size)

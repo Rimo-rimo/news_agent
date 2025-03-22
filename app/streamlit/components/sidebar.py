@@ -63,7 +63,7 @@ def render_sidebar(user_info):
                         if st.button(f"{newsletter['title']}", key=f"newsletter_{newsletter['id']}", use_container_width=True):
                             # Store the selected newsletter ID in session state
                             st.session_state.selected_newsletter_id = newsletter['id']
-                            st.session_state.page = "view_newsletter"
+                            st.session_state.page = "view_content"
                             st.rerun()
                 
                 # Add some space between date groups

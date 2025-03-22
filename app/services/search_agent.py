@@ -57,8 +57,47 @@ class SearchAgent:
         
         return [record["id"] for record in response.data]
     
+    def store_citations(self, news_id: int, urls: list):
+        """
+        Supabase의 citations 테이블에 각 질문에 대한 참고 문서 URL을 개별 레코드로 저장
+        """
+        answer_records = [
+            {
+                "news_id": news_id,
+                "urls": str(urls)
+            }
+        ]
+        
+        response = (
+            self.supabase.table("citations")
+            .insert(answer_records)
+            .execute()
+        )
+        
+        return [record["id"] for record in response.data]
 
-    def run(self, user_id: int, perplexity_questions: list, tavily_questions: list, perplexity_question_ids: list, tavily_question_ids: list):
+    def store_image_urls(self, news_id: int, image_urls: list):
+        """
+        Supabase의 image_urls 테이블에 각 질문에 대한 이미지 URL을 개별 레코드로 저장
+        """
+        answer_records = [
+            {
+                "news_id": news_id,
+                "urls": str(image_urls)
+            }
+        ]
+        
+        response = (
+            self.supabase.table("image_urls")
+            .insert(answer_records)
+            .execute()
+        )
+        
+        return [record["id"] for record in response.data]
+        
+    
+
+    def run(self, user_id: int, news_id: int, perplexity_questions: list, tavily_questions: list, perplexity_question_ids: list, tavily_question_ids: list):
         payload = {
             'inputs': {
                 'perplexity_questions': str(perplexity_questions),
@@ -93,6 +132,11 @@ class SearchAgent:
             for result in tavily_result:
                 for image in result['images']:
                     tavily_images.append(image)
+                    
+            image_url_ids = self.store_image_urls(news_id, tavily_images)
+                    
+            urls = perplexity_urls + tavily_urls
+            citation_ids = self.store_citations(news_id, urls)
             
             perplexity_answer_ids = self.store_perplexity_answers(perplexity_question_ids, perplexity_answers, perplexity_urls)
             tavily_answer_ids = self.store_tavily_answers(tavily_question_ids, tavily_answers, tavily_urls)
@@ -105,7 +149,7 @@ class SearchAgent:
                 "perplexity_urls": perplexity_urls,
                 "tavily_urls": tavily_urls,
                 "tavily_images": tavily_images,
-                "urls": perplexity_urls + tavily_urls
+                "urls": urls
             }
         
         else:
