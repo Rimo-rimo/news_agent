@@ -30,6 +30,12 @@ def render_sidebar(user_info):
             st.session_state.news_query = None
             st.rerun()
         
+        # 로그아웃 버튼 추가
+        logout_button = st.button("로그아웃", use_container_width=True, type="secondary")
+        if logout_button:
+            from app.streamlit.auth import logout
+            logout()
+        
         st.divider()
         
         # Display newsletters grouped by date

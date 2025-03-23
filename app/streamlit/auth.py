@@ -64,4 +64,14 @@ def handle_signup(username, password, password_repeat, config):
             st.balloons()
         except Exception as e:
             st.error(f"회원가입 중 오류가 발생했습니다: {e}")
-            print(e) 
+            print(e)
+
+def logout():
+    """사용자 로그아웃 처리 함수"""
+    for key in ['authentication_status', 'username', 'name', 'logout']:
+        if key in st.session_state:
+            del st.session_state[key]
+    
+    # 로그아웃 메시지 표시
+    st.toast('로그아웃 되었습니다!', icon='👋')
+    st.rerun() 
