@@ -9,6 +9,8 @@ from app.streamlit.components.icon import icon_dict
 import os
 import dotenv
 import base64
+from streamlit_lottie import st_lottie
+import json
 
 dotenv.load_dotenv()
 
@@ -54,11 +56,15 @@ def render_content(user_info, text_font_size):
             with st.spinner("##### 뉴스를 읽어보고 있어요"):
                 read_image_empty = st.empty()
                 with read_image_empty:
-                    with open(f"{APPFILEPATH}/data/svg/333.Inspection.svg", "rb") as f:
-                        svg_content = f.read()
-                        b64 = base64.b64encode(svg_content).decode()
-                    home_illustration = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 300px;">'
-                    st.markdown(home_illustration, unsafe_allow_html=True)
+                    lottie_path = f"{APPFILEPATH}/data/lottie/333.Inspection.json"
+                    with open(lottie_path, "r") as f:
+                        lottie_json = json.load(f)
+                    # 크기 조절 옵션 추가
+                    st_lottie(
+                        lottie_json,
+                        width=300,   # 원하는 너비(픽셀)
+                        key="read_lottie_animation"
+                    )
                 crawl_agent = CrawlAgent()
                 crawl_agent_response = crawl_agent.run(user_id=user_info["id"], url=st.session_state.news_query)
                 news_id = crawl_agent_response["news_id"]
@@ -118,12 +124,16 @@ def render_content(user_info, text_font_size):
                         st.markdown("생성 중입니다.")
             
             with search_image_empty:
-                with open(f"{APPFILEPATH}/data/svg/268.Vocabulary.svg", "rb") as f:
-                    svg_content = f.read()
-                    b64 = base64.b64encode(svg_content).decode()
-                    home_illustration = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 300px;">'
-                st.markdown(home_illustration, unsafe_allow_html=True)
-            
+                lottie_path = f"{APPFILEPATH}/data/lottie/268.Vocabulary.json"
+                with open(lottie_path, "r") as f:
+                    lottie_json = json.load(f)
+                # 크기 조절 옵션 추가
+                st_lottie(
+                    lottie_json,
+                    width=300,   # 원하는 너비(픽셀)
+                    key="search_lottie_animation"
+                )
+
             with status_ment:
                 with st.spinner("##### 아래 궁금증도 함께 조사해 볼게요!"):
                     search_agent = SearchAgent()
@@ -182,11 +192,16 @@ def render_content(user_info, text_font_size):
             with st.spinner("##### 뉴스레터를 작성 중이에요."):
                 write_image_empty = st.empty()
                 with write_image_empty:
-                    with open(f"{APPFILEPATH}/data/svg/307.Writing.svg", "rb") as f:
-                        svg_content = f.read()
-                        b64 = base64.b64encode(svg_content).decode()
-                        home_illustration = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 300px;">'
-                    st.markdown(home_illustration, unsafe_allow_html=True)
+                    # lottie 파일 로드
+                    lottie_path = f"{APPFILEPATH}/data/lottie/307.Writing.json"
+                    with open(lottie_path, "r") as f:
+                        lottie_json = json.load(f)
+                    # 크기 조절 옵션 추가
+                    st_lottie(
+                        lottie_json,
+                        width=300,   # 원하는 너비(픽셀)
+                        key="write_lottie_animation"
+                    )
                 full_response = "\n"
                 newsletter_writer = NewsletterWriter()
                 

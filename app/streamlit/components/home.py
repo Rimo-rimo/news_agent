@@ -7,6 +7,9 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import dotenv
+from streamlit_lottie import st_lottie
+import time
+import json
 
 dotenv.load_dotenv()
 
