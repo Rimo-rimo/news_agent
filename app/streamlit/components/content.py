@@ -6,11 +6,10 @@ from app.services.search_agent import SearchAgent
 from app.services.newsletter_writer import NewsletterWriter
 import datetime
 from app.streamlit.components.icon import icon_dict
-import time
-import urllib.parse
-import requests
-from bs4 import BeautifulSoup
-import concurrent.futures
+import os
+import dotenv
+
+dotenv.load_dotenv()
 
 def render_content(user_info, text_font_size):
     content_container = stylable_container(
@@ -49,8 +48,10 @@ def render_content(user_info, text_font_size):
     # Initial content generation
     with content_container:
         with st.container(border=False):
-            some_empty = st.empty()
             with st.spinner("##### 뉴스를 읽어보고 있어요"):
+                read_image_empty = st.empty()
+                with read_image_empty:
+                    st.image(os.path.join(os.getenv("APPFILEPATH"), "./data/illustrations/read_illustration.png"), width=300)
                 crawl_agent = CrawlAgent()
                 crawl_agent_response = crawl_agent.run(user_id=user_info["id"], url=st.session_state.news_query)
                 news_id = crawl_agent_response["news_id"]
@@ -69,6 +70,7 @@ def render_content(user_info, text_font_size):
                 tavily_question_ids = pre_news_response["tavily_question_ids"]
                 perplexity_questions = pre_news_response["perplexity_questions"]
                 tavily_questions = pre_news_response["tavily_questions"]
+                read_image_empty.empty()
 
     # Display title and introduction
     with content_container:
@@ -101,11 +103,15 @@ def render_content(user_info, text_font_size):
     with qa_container:
         with st.container(border=False):
             status_ment = st.empty()
+            search_image_empty = st.empty()
             perplexity_question_empties = [st.empty() for _ in range(len(perplexity_questions))]
             for i, perplexity_question_empty in enumerate(perplexity_question_empties):
                 with perplexity_question_empty:
                     with st.expander(f"Q. :grey[{perplexity_questions[i]}]"):
                         st.markdown("생성 중입니다.")
+            
+            with search_image_empty:
+                st.image(os.path.join(os.getenv("APPFILEPATH"), "./data/illustrations/search_illustration.png"), width=300)
             
             with status_ment:
                 with st.spinner("##### 아래 궁금증도 함께 조사해 볼게요!"):
@@ -123,7 +129,7 @@ def render_content(user_info, text_font_size):
                     tavily_images = search_agent_response["tavily_images"]
                     urls = search_agent_response["urls"]
                     
-            # status_ment.markdown("##### :grey-background[아래 궁금증을 해결해 봤어요!]", unsafe_allow_html=True)
+            search_image_empty.empty()
             status_ment.markdown(f"### {icon_dict['q']} 아래 궁금증을 해결해 봤어요!", unsafe_allow_html=True)
             # f'### {icon_dict[icon_key]}'
             for i, perplexity_question_empty in enumerate(perplexity_question_empties):
@@ -163,6 +169,9 @@ def render_content(user_info, text_font_size):
             news_placeholder = st.empty()
             
             with st.spinner("##### 뉴스레터를 작성 중이에요."):
+                write_image_empty = st.empty()
+                with write_image_empty:
+                    st.image(os.path.join(os.getenv("APPFILEPATH"), "./data/illustrations/write_illustration.png"), width=300)
                 full_response = "\n"
                 newsletter_writer = NewsletterWriter()
                 
@@ -195,7 +204,7 @@ def render_content(user_info, text_font_size):
                         {full_response}</div>""",
                         unsafe_allow_html=True
                     )
-        
+                write_image_empty.empty()
         st.text(" ")
         st.text(" ")
         st.text(" ") 
