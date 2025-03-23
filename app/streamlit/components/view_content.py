@@ -8,51 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 import concurrent.futures
 import ast
+import json
 
-def get_page_title(url):
-    try:
-        # 타임아웃을 짧게 설정하여 응답 지연 방지
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-        response = requests.get(url, headers=headers, timeout=3)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # 페이지 제목 가져오기
-            title = soup.title.string if soup.title else None
-            
-            # 제목이 너무 길면 자르기
-            if title and len(title) > 50:
-                title = title[:36] + "..."
-                
-            return title if title else urllib.parse.urlparse(url).netloc
-        return urllib.parse.urlparse(url).netloc
-    except Exception as e:
-        # 오류 발생 시 도메인 이름 반환
-        return urllib.parse.urlparse(url).netloc 
-
-def get_page_titles_parallel(urls, max_workers=30):
-    """여러 URL의 페이지 제목을 병렬로 가져옵니다."""
-    titles = [None] * len(urls)
-    favicon_urls = [None] * len(urls)
-    
-    def process_url(index_url):
-        index, url = index_url
-        parsed_url = urllib.parse.urlparse(url)
-        domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
-        favicon_url = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
-        title = get_page_title(url)
-        return index, title, favicon_url
-    
-    # 병렬로 URL 처리
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # URL과 인덱스를 함께 전달
-        results = executor.map(process_url, enumerate(urls))
-        
-        # 결과 저장
-        for index, title, favicon_url in results:
-            titles[index] = title
-            favicon_urls[index] = favicon_url
-            
-    return titles, favicon_urls 
 
 def render_view_content(user_info, text_font_size):
     # Get the selected newsletter details
@@ -125,14 +82,67 @@ def render_view_content(user_info, text_font_size):
         with introduction_container:
             with st.container(border=False):
                 st.markdown(f"<div style='color: #191F28; line-height: 1.8; font-size: {text_font_size}px;'>{newsletter['introduction']}</div>", unsafe_allow_html=True)
-        
-        st.text(" ")
-        st.text(" ")
     
     # Display newsletter content
     with newsletter_container:
         with st.container(border=False):
+                # 인용 URL들 가져오기
+            if 'citations' in newsletter:
+                citation_urls = ast.literal_eval(newsletter['citations'][0]['urls'])
+                citation_titles = ast.literal_eval(newsletter['citations'][0]['titles'])
+                favicon_urls = []
+                for url in citation_urls:
+                    parsed_url = urllib.parse.urlparse(url)
+                    domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
+                    favicon_url = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
+                    favicon_urls.append(favicon_url)
+                # st.write(ast.literal_eval(newsletter['citations'][0]['urls']))
+            
+            # 이미지 URL 가져오기
+            if 'image_urls' in newsletter:
+                tavily_images = []
+                for img_record in newsletter['image_urls']:
+                    try:
+                        # 전체 urls 문자열을 파싱
+                        img_list = ast.literal_eval(img_record['urls'])
+                        # 파싱된 리스트의 각 항목을 tavily_images에 추가
+                        for img in img_list:
+                            if 'url' in img:
+                                tavily_images.append({'url': img['url']})
+                    except (ValueError, SyntaxError) as e:
+                        # 파싱 오류 발생 시 로그만 남기고 계속 진행
+                        print(f"Error parsing image URL: {e}")
+                        continue
+
+            if citation_urls or tavily_images:
+                st.text(" ")
+                st.text(" ")
+                
+                # URL 정보 표시
+                if citation_urls:
+                    # 파비콘과 URL을 함께 표시
+                    url_popover_test = f"""![favicon]({favicon_urls[0]}) ![favicon]({favicon_urls[1]}) ![favicon]({favicon_urls[2]}) ![favicon]({favicon_urls[3]}) ![favicon]({favicon_urls[4]}) 총 **{len(citation_urls)}**개의 기사를 분석했어요."""
+                    with st.popover(url_popover_test, use_container_width=True):
+                        for url, favicon_url, title in zip(citation_urls, favicon_urls, citation_titles):
+                            st.markdown(
+                                f'<div style="display: flex; align-items: center; margin-bottom: 5px;">'
+                                f'<img src="{favicon_url}" style="margin-right: 5px; width: 20px; height: 20px;">'
+                                f'<a href="{url}" style="text-decoration: none; color: #000000;">{title}</a>'
+                                f'</div>',
+                                unsafe_allow_html=True
+                                )
+                
+                # 이미지 표시
+                if tavily_images:
+                    image_cards = ""
+                    for tavily_image in tavily_images:
+                        image_cards += f"""
+                            <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #000000;"></div>"""
+                    
+                    st.markdown(f"""<div style="display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0;">{image_cards}</div>""", unsafe_allow_html=True)
             # Process content to ensure icons are displayed correctly
+            st.text(" ")
+            st.text(" ")
             full_content = "\n" + newsletter['content']
             
             # Replace headers with icon headers if they don't already have icons
@@ -166,56 +176,10 @@ def render_view_content(user_info, text_font_size):
             if answer:
                 questions.append({"question": q['question'], "answer": answer})
     
-    # 출처 링크 및 이미지 표시 부분 추가
-    # urls = []
-    # tavily_images = []
-    
-    # # 인용 URL들 가져오기
-    # if 'citations' in newsletter:
-    #     urls = [citation['url'] for citation in newsletter['citations'] if 'url' in citation]
-    
-    # # 이미지 URL 가져오기
-    # if 'image_urls' in newsletter:
-    #     tavily_images = [{'url': ast.literal_eval(img)['url']} for img in newsletter['image_urls']]
-    
-    # # 이미지와 URL 정보 표시
-    
-    # if urls or tavily_images:
-    #     st.text(" ")
-    #     st.text(" ")
-        
-    #     # URL 정보 표시
-    #     if urls:
-    #         url_titles, favicon_urls = get_page_titles_parallel(urls)
-    #         # 파비콘과 URL을 함께 표시
-    #         url_popover_text = f"""![favicon]({favicon_urls[0]})"""
-    #         if len(favicon_urls) > 1:
-    #             for i in range(1, min(5, len(favicon_urls))):
-    #                 url_popover_text += f""" ![favicon]({favicon_urls[i]})"""
-    #         url_popover_text += f""" 총 **{len(urls)}**개의 기사를 분석했어요."""
-            
-    #         with st.popover(url_popover_text, use_container_width=True):
-    #             for url, favicon_url, title in zip(urls, favicon_urls, url_titles):
-    #                 st.markdown(
-    #                     f'<div style="display: flex; align-items: center; margin-bottom: 5px;">'
-    #                     f'<img src="{favicon_url}" style="margin-right: 5px; width: 20px; height: 20px;">'
-    #                     f'<a href="{url}" style="text-decoration: none; color: #000000;">{title}</a>'
-    #                     f'</div>',
-    #                     unsafe_allow_html=True
-    #                 )
-        
-        # # 이미지 표시
-        # if tavily_images:
-        #     image_cards = ""
-        #     for tavily_image in tavily_images:
-        #         image_cards += f"""
-        #             <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #000000;"></div>"""
-            
-        #     st.markdown(f"""<div style="display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0;">{image_cards}</div>""", unsafe_allow_html=True)
-    
     # Display Q&A section
     with qa_container:
         with st.container(border=False):
+            st.text(" ")
             st.markdown(f"### {icon_dict['q']} 아래 궁금증을 해결해 봤어요!", unsafe_allow_html=True)
             
             # Display each question and answer

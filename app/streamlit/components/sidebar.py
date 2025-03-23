@@ -54,7 +54,7 @@ def render_sidebar(user_info):
                                 transition: background-color 0.3s, transform 0.2s;
                             }
                             button:hover {
-                                background-color: #FCD27A;
+                                background-color: #EEF5FE;
                                 transform: translateY(-3px);
                                 cursor: pointer;
                             }
