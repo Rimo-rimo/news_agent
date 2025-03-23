@@ -5,6 +5,12 @@ import base64
 import urllib.parse
 import requests
 from bs4 import BeautifulSoup
+import os
+import dotenv
+
+dotenv.load_dotenv()
+
+APPFILEPATH = os.getenv("APPFILEPATH")
 
 
 def render_home():
@@ -20,7 +26,7 @@ def render_home():
 
     with home_container:
         # SVG 파일 읽기 및 표시
-        with open("/Users/rimo/Documents/Rimo_Studio/news_agent/app/data/illustrations/man_1.svg", "rb") as f:
+        with open(f"{APPFILEPATH}/data/illustrations/man_1.svg", "rb") as f:
             svg_content = f.read()
             b64 = base64.b64encode(svg_content).decode()
             home_illustration = f'<img src="data:image/svg+xml;base64,{b64}" style="display: block; margin: 0 auto; width: 300px;">'

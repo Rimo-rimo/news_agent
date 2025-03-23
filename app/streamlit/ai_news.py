@@ -10,7 +10,7 @@ from app.services.crawl_agent import CrawlAgent
 from app.services.data_manager import DataManager
 from streamlit_extras.stylable_container import stylable_container
 import json
-import yaml
+import yaml 
 from yaml.loader import SafeLoader
 import datetime
 import re
@@ -22,7 +22,7 @@ from app.streamlit.components.view_content import render_view_content
 
 # Streamlit Settings
 st.set_page_config(page_title="Owl Letter",layout="wide", page_icon="🦉",initial_sidebar_state="collapsed")
-st.logo(image="./data/logo.svg", 
+st.logo(image="./data/logo.svg",
         size="small"
         )
 
