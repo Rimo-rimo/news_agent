@@ -61,7 +61,10 @@ with open('./config.yaml') as file:
 
 
 # ############################# Auth Page #############################
-setup_auth(config)
+authenticator = setup_auth(config)
+# Store authenticator in session state so it can be accessed for logout
+if 'authenticator' not in st.session_state:
+    st.session_state['authenticator'] = authenticator
 
 if st.session_state['authentication_status']:
     user_name = st.session_state['username']
