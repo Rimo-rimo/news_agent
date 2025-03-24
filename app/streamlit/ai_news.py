@@ -15,6 +15,7 @@ from yaml.loader import SafeLoader
 import datetime
 import re
 from app.streamlit.auth import setup_auth
+from app.streamlit.components.landing import render_landing
 from app.streamlit.components.sidebar import render_sidebar
 from app.streamlit.components.home import render_home
 from app.streamlit.components.content import render_content
@@ -25,9 +26,21 @@ st.set_page_config(page_title="Owl Letter",layout="wide", page_icon="🦉",initi
 st.logo(image="./data/logo.svg",
         size="small"
         )
+# 전체 컨테이너의 좌우상 패딩 줄이기
+st.markdown(""" 
+    <style>
+    .block-container {
+        padding-left: 1rem !important;  
+        padding-right: 1rem !important;
+        padding-top: 0rem !important;
+    }
+    </style>    
+    """, unsafe_allow_html=True
+)
 
 if "page" not in st.session_state:
-        st.session_state.page = "home"
+    st.session_state.page = "landing" 
+    # st.session_state.page = "landing"
 
 if "news_query" not in st.session_state:
     st.session_state.news_query = None
@@ -72,6 +85,10 @@ if st.session_state['authentication_status']:
     
     # ############################# Sidebar #############################
     render_sidebar(user_info)
+
+    # ############################# Landing Page #############################
+    if st.session_state.page == "landing":
+        render_landing()
 
     # ############################# Home #############################
     if st.session_state.page == "home":

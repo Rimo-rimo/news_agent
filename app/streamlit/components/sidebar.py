@@ -29,6 +29,11 @@ def render_sidebar(user_info):
             st.session_state.page = "home"
             st.session_state.news_query = None
             st.rerun()
+        
+        landing_button = st.button("🚀 landing page", use_container_width=True, type="primary")
+        if landing_button:
+            st.session_state.page = "landing"
+            st.rerun()
                 
         st.session_state['authenticator'].logout(
             button_name="로그아웃",
