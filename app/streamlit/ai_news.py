@@ -22,7 +22,7 @@ from app.streamlit.components.content import render_content
 from app.streamlit.components.view_content import render_view_content
 
 # Streamlit Settings
-st.set_page_config(page_title="Owl Letter",layout="wide", page_icon="🦉",initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Newswing",layout="wide", page_icon="🦉",initial_sidebar_state="collapsed")
 st.logo(image="./data/logo.svg",
         size="small"
         )

@@ -40,4 +40,8 @@ icon_dict = {
     "icon_17": get_icon(f"{APPFILEPATH}/data/icon/icon_17.svg", width, height),
     "icon_18": get_icon(f"{APPFILEPATH}/data/icon/icon_18.svg", width, height),
     "q": get_icon(f"{APPFILEPATH}/data/icon/q.svg", width, height),
+    "content_0": get_icon(f"{APPFILEPATH}/data/icon/content_0.svg", 30, 30),
+    # "content_1": get_icon(f"{APPFILEPATH}/data/icon/content_1.svg", width, height),
+    # "content_2": get_icon(f"{APPFILEPATH}/data/icon/content_2.svg", width, height),
+    # "content_3": get_icon(f"{APPFILEPATH}/data/icon/content_3.svg", width, height),
 }
