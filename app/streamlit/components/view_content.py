@@ -137,7 +137,7 @@ def render_view_content(user_info, text_font_size):
                     image_cards = ""
                     for tavily_image in tavily_images:
                         image_cards += f"""
-                            <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #000000;"></div>"""
+                            <div style="flex: 0 0 auto; width: 300px; height: 200px; margin-right: 10px; text-align: center;"><img src="{tavily_image['url']}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 3px solid #F3F4F6;"></div>"""
                     
                     st.markdown(f"""<div style="display: flex; overflow-x: auto; white-space: nowrap; padding: 10px 0;">{image_cards}</div>""", unsafe_allow_html=True)
             # Process content to ensure icons are displayed correctly

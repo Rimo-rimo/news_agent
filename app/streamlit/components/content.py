@@ -20,7 +20,7 @@ def render_content(user_info, text_font_size):
     content_container = stylable_container(
         key="content_container",
         css_styles="""
-                {
+                {d
                     width: 700px;
                     margin: 0 auto;
                     display: flex;
