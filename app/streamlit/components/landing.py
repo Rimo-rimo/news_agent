@@ -72,7 +72,8 @@ def render_landing():
             with button_col:
                 get_start_button_top = st.button("시작하기", use_container_width=True, type="primary", key="get_start_button_top")
             if get_start_button_top:
-                st.session_state["get_start_button"] = True
+                # st.session_state.page = "home" 
+                st.toast('🤠 준비 중입니다! 조금만 기다려 주세요.')
             with st.empty():
                 _ = st.container(border=False, height=30)
             col1, col2 = st.columns([1, 3])
@@ -132,5 +133,6 @@ def render_landing():
             with button_col_bottom:
                 get_start_button_bottom = st.button("시작하기", use_container_width=True, type="primary", key="get_start_button_bottom")
             if get_start_button_bottom:
-                st.session_state["get_start_button"] = True
+                # st.session_state.page = "home" 
+                st.toast('🤠 준비 중입니다! 조금만 기다려 주세요.')
             

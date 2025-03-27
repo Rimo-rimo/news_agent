@@ -72,32 +72,31 @@ st.markdown(hide_decoration_bar_style, unsafe_allow_html=True)
 with open('./config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
+render_landing()
 
-# ############################# Auth Page #############################
-authenticator = setup_auth(config)
-# Store authenticator in session state so it can be accessed for logout
-if 'authenticator' not in st.session_state:
-    st.session_state['authenticator'] = authenticator
+# # ############################# Auth Page #############################
+# authenticator = setup_auth(config)
+# # Store authenticator in session state so it can be accessed for logout
+# if 'authenticator' not in st.session_state:
+#     st.session_state['authenticator'] = authenticator
 
-if st.session_state['authentication_status']:
-    user_name = st.session_state['username']
-    user_info = config['credentials']['usernames'][user_name]
-    
-    # ############################# Sidebar #############################
-    render_sidebar(user_info)
+# if st.session_state['authentication_status']:
+#     user_name = st.session_state['username']
+#     user_info = config['credentials']['usernames'][user_name]
 
-    # ############################# Landing Page #############################
-    if st.session_state.page == "landing":
-        render_landing()
+#     # ############################# Landing Page #############################
+#     if st.session_state.page == "landing":
+#         render_landing()
 
-    # ############################# Home #############################
-    if st.session_state.page == "home":
-        render_home()
+#     # ############################# Home #############################
+#     if st.session_state.page == "home":
+#         render_sidebar(user_info)
+#         render_home()
 
-    # ############################# Content #############################
-    if st.session_state.page == "content":
-        render_content(user_info, text_font_size)
+#     # ############################# Content #############################
+#     if st.session_state.page == "content":
+#         render_content(user_info, text_font_size)
 
-    # ############################# View Newsletter #############################
-    if st.session_state.page == "view_content":
-        render_view_content(user_info, text_font_size)
+#     # ############################# View Newsletter #############################
+#     if st.session_state.page == "view_content":
+#         render_view_content(user_info, text_font_size)
