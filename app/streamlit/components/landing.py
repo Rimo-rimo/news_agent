@@ -135,4 +135,4 @@ def render_landing():
             if get_start_button_bottom:
                 # st.session_state.page = "home" 
                 st.toast('🤠 준비 중입니다! 조금만 기다려 주세요.')
-            
+            gh
