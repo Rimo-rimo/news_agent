@@ -16,7 +16,12 @@ class TavilyCall:
     async def _async_call(self, query: str) -> Dict[str, Any]:
         """단일 Tavily API 비동기 호출 메서드"""
         try:
-            response = await self.client.search(query=query)
+            response = await self.client.search(
+                query=query,
+                max_results=5,
+                include_raw_content=True,
+                include_images=True,
+            )
             return response
         except Exception as e:
             print(f"API 호출 중 오류 발생: {e}")

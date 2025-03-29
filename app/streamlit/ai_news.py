@@ -15,7 +15,7 @@ from yaml.loader import SafeLoader
 import datetime
 import re
 from app.streamlit.auth import setup_auth
-from app.streamlit.components.landing import render_landing
+from app.streamlit.landing import render_landing
 from app.streamlit.components.sidebar import render_sidebar
 from app.streamlit.components.home import render_home
 from app.streamlit.components.content import render_content
@@ -39,7 +39,7 @@ st.markdown("""
 )
 
 if "page" not in st.session_state:
-    st.session_state.page = "landing" 
+    st.session_state.page = "home" 
     # st.session_state.page = "landing"
 
 if "news_query" not in st.session_state:
@@ -72,31 +72,30 @@ st.markdown(hide_decoration_bar_style, unsafe_allow_html=True)
 with open('./config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
-render_landing()
 
-# # ############################# Auth Page #############################
-# authenticator = setup_auth(config)
-# # Store authenticator in session state so it can be accessed for logout
-# if 'authenticator' not in st.session_state:
-#     st.session_state['authenticator'] = authenticator
+# ############################# Auth Page #############################
+authenticator = setup_auth(config)
+# Store authenticator in session state so it can be accessed for logout
+if 'authenticator' not in st.session_state:
+    st.session_state['authenticator'] = authenticator
 
-# if st.session_state['authentication_status']:
-#     user_name = st.session_state['username']
-#     user_info = config['credentials']['usernames'][user_name]
+if st.session_state['authentication_status']:
+    user_name = st.session_state['username']
+    user_info = config['credentials']['usernames'][user_name]
 
-#     # ############################# Landing Page #############################
-#     if st.session_state.page == "landing":
-#         render_landing()
+    # ############################# Landing Page #############################
+    if st.session_state.page == "landing":
+        render_landing()
 
-#     # ############################# Home #############################
-#     if st.session_state.page == "home":
-#         render_sidebar(user_info)
-#         render_home()
+    # ############################# Home #############################
+    if st.session_state.page == "home":
+        render_sidebar(user_info)
+        render_home()
 
-#     # ############################# Content #############################
-#     if st.session_state.page == "content":
-#         render_content(user_info, text_font_size)
+    # ############################# Content #############################
+    if st.session_state.page == "content":
+        render_content(user_info, text_font_size)
 
-#     # ############################# View Newsletter #############################
-#     if st.session_state.page == "view_content":
-#         render_view_content(user_info, text_font_size)
+    # ############################# View Newsletter #############################
+    if st.session_state.page == "view_content":
+        render_view_content(user_info, text_font_size)

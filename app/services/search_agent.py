@@ -154,7 +154,7 @@ class SearchAgent:
         }
         
         try:
-            response = requests.post(self.url, headers=self.headers, json=payload, timeout=230)
+            response = requests.post(self.url, headers=self.headers, json=payload)
         except requests.exceptions.Timeout:
             # 타임아웃 발생 시 처리할 로직
             raise Exception(f"요청 시간이 초과되었습니다. 다시 시도해주세요.")

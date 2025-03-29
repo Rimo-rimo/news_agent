@@ -42,7 +42,7 @@ class PerplexityCall:
             "stream": False,
             "presence_penalty": 0,
             "frequency_penalty": 1,
-            "web_search_options": {"search_context_size": "high"}
+            "web_search_options": {"search_context_size": "medium"}
         }
 
         headers = {

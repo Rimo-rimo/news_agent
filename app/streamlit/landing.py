@@ -70,10 +70,7 @@ def render_landing():
                 _ = st.container(border=False, height=20)
             _, button_col, _ = st.columns([3, 1, 3])
             with button_col:
-                get_start_button_top = st.button("시작하기", use_container_width=True, type="primary", key="get_start_button_top")
-            if get_start_button_top:
-                # st.session_state.page = "home" 
-                st.toast('🤠 준비 중입니다! 조금만 기다려 주세요.')
+                st.link_button("시작하기", os.getenv("AI_NEWS_HOME_URL"), use_container_width=True, type="primary")
             with st.empty():
                 _ = st.container(border=False, height=30)
             col1, col2 = st.columns([1, 3])
@@ -131,8 +128,18 @@ def render_landing():
                 _ = st.container(border=False, height=30)
             _, button_col_bottom, _ = st.columns([3, 1, 3])
             with button_col_bottom:
-                get_start_button_bottom = st.button("시작하기", use_container_width=True, type="primary", key="get_start_button_bottom")
-            if get_start_button_bottom:
-                # st.session_state.page = "home" 
-                st.toast('🤠 준비 중입니다! 조금만 기다려 주세요.')
-            gh
+                st.link_button("시작하기", os.getenv("AI_NEWS_HOME_URL"), use_container_width=True, type="primary")
+if __name__ == "__main__":
+    st.set_page_config(page_title="Newswing",layout="wide", page_icon="🦉")
+    # 전체 컨테이너의 좌우상 패딩 줄이기
+    st.markdown(""" 
+        <style>
+        .block-container {
+            padding-left: 1rem !important;  
+            padding-right: 1rem !important;
+            padding-top: 3rem !important;
+        }
+        </style>    
+        """, unsafe_allow_html=True
+    )
+    render_landing()
